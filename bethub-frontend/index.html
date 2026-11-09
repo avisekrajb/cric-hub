@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      try {
+        if (localStorage.getItem("bethub_theme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+        var bethubLang = localStorage.getItem("bethub_language") || "en";
+        if (["en", "ne", "bho", "mai"].indexOf(bethubLang) === -1) bethubLang = "en";
+        document.documentElement.setAttribute("data-lang", bethubLang);
+        document.documentElement.lang = bethubLang;
+      } catch (error) {
+        /* localStorage can be unavailable */
+      }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/ball.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f3f7ee" />
+    <meta
+      name="description"
+      content="Bethub — live cricket scores, live video, ball-by-ball commentary, chat and realtime stats."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Bethub · Live cricket, realtime</title>
+    <style>
+      /* Boot splash is inlined so it paints before the JS bundle loads. */
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: #f3f7ee;
+        color: #0c1a10;
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        transition: opacity 0.35s ease;
+      }
+      html.dark #boot-splash {
+        background: #040906;
+        color: #ffffff;
+      }
+      html[data-lang="ne"] #boot-splash,
+      html[data-lang="bho"] #boot-splash,
+      html[data-lang="mai"] #boot-splash {
+        font-family: "Noto Sans Devanagari", "Inter", sans-serif;
+      }
+      #boot-splash.boot-hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .boot-orbit {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 88px;
+        height: 88px;
+      }
+      .boot-ring-a,
+      .boot-ring-b {
+        position: absolute;
+        border-radius: 9999px;
+        border: 2px solid transparent;
+      }
+      .boot-ring-a {
+        inset: 0;
+        border-top-color: #9fd61f;
+        border-right-color: rgba(159, 214, 31, 0.25);
+        animation: bootSpin 1.15s linear infinite;
+      }
+      .boot-ring-b {
+        inset: 9px;
+        border-bottom-color: #00b374;
+        border-left-color: rgba(0, 179, 116, 0.3);
+        animation: bootSpinReverse 1.7s linear infinite;
+      }
+      .boot-ball {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        border-radius: 9999px;
+        overflow: hidden;
+        background: radial-gradient(circle at 32% 28%, #ff7b7b 0%, #d92b3f 42%, #8f1526 100%);
+        box-shadow: inset -3px -4px 8px rgba(0, 0, 0, 0.45), 0 6px 16px rgba(217, 43, 63, 0.35);
+        animation: bootFloat 2.2s ease-in-out infinite;
+      }
+      .boot-seam {
+        position: absolute;
+        left: -10%;
+        top: 50%;
+        width: 120%;
+        height: 1.5px;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+        animation: bootSeam 2.2s ease-in-out infinite;
+      }
+      #boot-label {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        opacity: 0.65;
+      }
+      .boot-track {
+        position: relative;
+        width: 176px;
+        max-width: 60vw;
+        height: 4px;
+        overflow: hidden;
+        border-radius: 9999px;
+        background: rgba(12, 26, 16, 0.1);
+      }
+      html.dark .boot-track {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .boot-bar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 38%;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, #9fd61f, #00b374 60%, #42b6f5);
+        animation: bootBar 1.35s ease-in-out infinite;
+      }
+      @keyframes bootSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes bootSpinReverse {
+        to {
+          transform: rotate(-360deg);
+        }
+      }
+      @keyframes bootFloat {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-7px) scale(1.05);
+        }
+      }
+      @keyframes bootSeam {
+        0%,
+        100% {
+          transform: rotate(-16deg);
+          opacity: 0.45;
+        }
+        50% {
+          transform: rotate(16deg);
+          opacity: 0.9;
+        }
+      }
+      @keyframes bootBar {
+        0% {
+          transform: translateX(-120%);
+        }
+        100% {
+          transform: translateX(330%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-ring-a,
+        .boot-ring-b,
+        .boot-ball,
+        .boot-seam,
+        .boot-bar {
+          animation-duration: 3s !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="boot-splash" role="status" aria-live="polite">
+        <div class="boot-orbit">
+          <span class="boot-ring-a"></span>
+          <span class="boot-ring-b"></span>
+          <span class="boot-ball"><span class="boot-seam"></span></span>
+        </div>
+        <p id="boot-label">Loading Bethub…</p>
+        <div class="boot-track"><span class="boot-bar"></span></div>
+      </div>
+    </div>
+    <script>
+      try {
+        var bootLabels = {
+          en: "Loading Bethub…",
+          ne: "Bethub लोड हुँदैछ…",
+          bho: "Bethub लोड हो रहल बा…",
+          mai: "Bethub लोड भ रहल अछि…"
+        };
+        var bootLang = document.documentElement.getAttribute("data-lang") || "en";
+        document.getElementById("boot-label").textContent = bootLabels[bootLang] || bootLabels.en;
+        var splash = document.getElementById("boot-splash");
+        var hideSplash = function () {
+          if (!splash) return;
+          splash.classList.add("boot-hide");
+          setTimeout(function () {
+            if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+          }, 400);
+        };
+        window.addEventListener("bethub:ready", hideSplash);
+        setTimeout(hideSplash, 8000);
+      } catch (error) {
+        /* splash is best effort */
+      }
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
