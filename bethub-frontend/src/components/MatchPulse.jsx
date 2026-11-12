@@ -1,7 +1,9 @@
 import { PlayerAvatar } from "./common/Avatars";
-import { cn, playerName, runRate } from "../lib/utils";
+import { useI18n } from "../contexts/LanguageContext";
+import { cn, playerName, roleLabel, runRate } from "../lib/utils";
 
 export default function MatchPulse({ match, className = "" }) {
+  const { t } = useI18n();
   const innings = match?.innings?.[match.currentInnings];
   if (!innings) return null;
   const striker = innings.striker;
@@ -17,7 +19,7 @@ export default function MatchPulse({ match, className = "" }) {
     <div className={cn("card overflow-hidden", className)}>
       <div className="grid divide-y divide-white/[0.06] sm:grid-cols-[1.15fr_1fr] sm:divide-x sm:divide-y-0">
         <div className="p-3.5">
-          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">At the crease</p>
+          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">{t("pulse.atCrease")}</p>
           <div className="space-y-2.5">
             {[
               { player: striker, line: strikerLine, onStrike: true },
@@ -30,7 +32,7 @@ export default function MatchPulse({ match, className = "" }) {
                     {playerName(player)}
                     {onStrike && <span className="h-1.5 w-1.5 animate-pulseDot rounded-full bg-lime" />}
                   </p>
-                  <p className="text-[10px] text-white/35">{line ? `${line.runs} (${line.balls})` : "—"} · {player?.role || "Batter"}</p>
+                  <p className="text-[10px] text-white/35">{line ? `${line.runs} (${line.balls})` : "—"} · {roleLabel(player?.role, t) || t("pulse.batter")}</p>
                 </div>
                 <div className="text-right text-[10px] text-white/40">
                   <p>SR {line?.balls ? ((line.runs / line.balls) * 100).toFixed(1) : "0.0"}</p>
@@ -43,16 +45,16 @@ export default function MatchPulse({ match, className = "" }) {
             <PlayerAvatar player={bowler} size="xs" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[12px] font-semibold text-white/75">{playerName(bowler)}</p>
-              <p className="text-[10px] text-white/35">{bowlerLine ? `${(bowlerLine.balls / 6).toFixed(1)} ov · ${bowlerLine.runs} runs · ${bowlerLine.wickets} wkt` : "Bowling"}</p>
+              <p className="text-[10px] text-white/35">{bowlerLine ? t("pulse.bowlerLine", { overs: (bowlerLine.balls / 6).toFixed(1), runs: bowlerLine.runs, wickets: bowlerLine.wickets }) : t("pulse.bowling")}</p>
             </div>
-            <span className="chip !text-[9px]">bowling</span>
+            <span className="chip !text-[9px]">{t("pulse.bowlingChip")}</span>
           </div>
         </div>
 
         <div className="p-3.5">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">This over</p>
-            <p className="text-[10px] text-white/35">CRR {runRate(innings.runs, innings.balls)}</p>
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">{t("pulse.thisOver")}</p>
+            <p className="text-[10px] text-white/35">{t("pulse.crr", { rate: runRate(innings.runs, innings.balls) })}</p>
           </div>
           <div className="flex min-h-[34px] flex-wrap gap-1.5">
             {balls.length ? (
@@ -82,22 +84,22 @@ export default function MatchPulse({ match, className = "" }) {
                 );
               })
             ) : (
-              <span className="text-[11px] text-white/30">First ball coming up.</span>
+              <span className="text-[11px] text-white/30">{t("pulse.firstBall")}</span>
             )}
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {innings.freeHit && <span className="chip !border-amber-400/30 !bg-amber-400/10 !text-amber-300">FREE HIT</span>}
-            {innings.needsBowler && <span className="chip !border-coral/30 !bg-coral/10 !text-coral">NEW BOWLER</span>}
-            {innings.completed && <span className="chip">INNINGS COMPLETE</span>}
+            {innings.freeHit && <span className="chip !border-amber-400/30 !bg-amber-400/10 !text-amber-300">{t("pulse.freeHit")}</span>}
+            {innings.needsBowler && <span className="chip !border-coral/30 !bg-coral/10 !text-coral">{t("pulse.newBowler")}</span>}
+            {innings.completed && <span className="chip">{t("pulse.inningsComplete")}</span>}
             {!innings.completed && (
               <span className="chip">
-                {innings.wickets} down · {Math.max(0, (match.overs || 20) * 6 - innings.balls)} balls left
+                {t("pulse.down", { wickets: innings.wickets, balls: Math.max(0, (match.overs || 20) * 6 - innings.balls) })}
               </span>
             )}
           </div>
           {over?.bowler && (
             <p className="mt-2 truncate text-[10px] text-white/30">
-              {over.bowler?.name || "Bowler"} · over {over.number} · {over.runs} runs
+              {t("pulse.overSummary", { bowler: over.bowler?.name || t("pulse.bowling"), over: over.number, runs: over.runs })}
             </p>
           )}
         </div>

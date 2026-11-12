@@ -1,52 +1,53 @@
 import { useEffect, useRef, useState } from "react";
 import { Ban, CircleDot, Flame, Sparkles, Zap } from "lucide-react";
+import { useI18n } from "../contexts/LanguageContext";
 import { cn } from "../lib/utils";
 
 const MOMENTS = {
   "6": {
     key: "six",
-    title: "SIX!",
-    subtitle: "Into the stands",
+    titleKey: "moment.six",
+    subtitleKey: "moment.sixSub",
     icon: Flame,
     tone: "from-lime/30 via-mint/15 to-transparent border-lime/40 text-lime",
     chip: "bg-lime text-ink-950",
   },
   "4": {
     key: "four",
-    title: "FOUR!",
-    subtitle: "Threaded through the gap",
+    titleKey: "moment.four",
+    subtitleKey: "moment.fourSub",
     icon: Zap,
     tone: "from-sky/30 via-sky/10 to-transparent border-sky/40 text-sky",
     chip: "bg-sky text-ink-950",
   },
   W: {
     key: "out",
-    title: "OUT!",
-    subtitle: "The breakthrough",
+    titleKey: "moment.out",
+    subtitleKey: "moment.outSub",
     icon: Ban,
     tone: "from-coral/30 via-coral/10 to-transparent border-coral/40 text-coral",
     chip: "bg-coral text-white",
   },
   nb: {
     key: "noball",
-    title: "NO BALL",
-    subtitle: "Free hit incoming",
+    titleKey: "moment.noBall",
+    subtitleKey: "moment.noBallSub",
     icon: Sparkles,
     tone: "from-amber-400/30 via-amber-300/10 to-transparent border-amber-400/40 text-amber-400",
     chip: "bg-amber-400 text-ink-950",
   },
   wd: {
     key: "wide",
-    title: "WIDE",
-    subtitle: "Extra run",
+    titleKey: "moment.wide",
+    subtitleKey: "moment.wideSub",
     icon: CircleDot,
     tone: "from-amber-400/30 via-amber-300/10 to-transparent border-amber-400/40 text-amber-400",
     chip: "bg-amber-400 text-ink-950",
   },
   w: {
     key: "wicket",
-    title: "OUT!",
-    subtitle: "The breakthrough",
+    titleKey: "moment.out",
+    subtitleKey: "moment.outSub",
     icon: Ban,
     tone: "from-coral/30 via-coral/10 to-transparent border-coral/40 text-coral",
     chip: "bg-coral text-white",
@@ -68,6 +69,7 @@ const keyOf = (innings, ball) =>
   `${innings?.number ?? 0}-${ball?.over ?? 0}-${ball?.ball ?? 0}-${ball?.label ?? ""}`;
 
 export default function BallMoment({ match, className = "" }) {
+  const { t } = useI18n();
   const innings = match?.innings?.[match.currentInnings];
   const over = innings?.oversDetail?.at(-1);
   const lastBall = over?.balls?.at(-1);
@@ -128,11 +130,11 @@ export default function BallMoment({ match, className = "" }) {
           </span>
           <div className="min-w-0">
             <p className="flex items-center gap-2 font-display text-2xl font-700 tracking-tight">
-              <Icon size={20} /> {moment.title}
+              <Icon size={20} /> {t(moment.titleKey)}
             </p>
             <p className="text-[11px] font-medium text-white/60">
-              {moment.subtitle}
-              {moment.ball?.over ? ` · over ${moment.ball.over}.${moment.ball.ball}` : ""}
+              {t(moment.subtitleKey)}
+              {moment.ball?.over ? ` · ${t("moment.over", { over: `${moment.ball.over}.${moment.ball.ball}` })}` : ""}
             </p>
           </div>
         </div>

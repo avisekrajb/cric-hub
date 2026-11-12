@@ -100,6 +100,51 @@ export const statusLabel = (status) => {
 
 export const isLive = (match) => ["live", "innings-break"].includes(match?.status);
 
+const ROLE_KEYS = {
+  Batter: "batter",
+  Bowler: "bowler",
+  "All-Rounder": "allRounder",
+  "Wicket-Keeper": "wicketKeeper",
+};
+
+/** Translate player roles while keeping unknown roles as-is. */
+export const roleLabel = (role, t) => {
+  if (!role) return "";
+  const key = ROLE_KEYS[role];
+  return key && t ? t(`role.${key}`) : role;
+};
+
+const BATTING_KEYS = {
+  "Right-hand bat": "right",
+  "Left-hand bat": "left",
+};
+
+const BOWLING_KEYS = {
+  None: "none",
+  "Right-arm fast": "rightFast",
+  "Right-arm fast-medium": "rightFastMedium",
+  "Right-arm medium": "rightMedium",
+  "Right-arm offbreak": "rightOffbreak",
+  "Right-arm legbreak": "rightLegbreak",
+  "Left-arm fast": "leftFast",
+  "Left-arm medium": "leftMedium",
+  "Left-arm orthodox": "leftOrthodox",
+  "Left-arm wrist-spin": "leftWristSpin",
+};
+
+/** Translate the enumerated batting/bowling styles from the backend. */
+export const battingStyleLabel = (style, t) => {
+  if (!style) return "";
+  const key = BATTING_KEYS[style];
+  return key && t ? t(`style.bat.${key}`) : style;
+};
+
+export const bowlingStyleLabel = (style, t) => {
+  if (!style) return "";
+  const key = BOWLING_KEYS[style];
+  return key && t ? t(`style.bowl.${key}`) : style;
+};
+
 export const teamName = (team) => team?.shortName || team?.name || "TBC";
 
 export const playerName = (player) => {

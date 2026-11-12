@@ -22,7 +22,7 @@ import Tabs from "../components/common/Tabs";
 import { EmptyState, PageLoader } from "../components/common/States";
 import { useFetch } from "../hooks/useFetch";
 import { useI18n } from "../contexts/LanguageContext";
-import { cn, formatNumber, teamName, timeAgo } from "../lib/utils";
+import { cn, formatNumber, roleLabel, teamName, timeAgo } from "../lib/utils";
 
 const mainTabKeys = [
   { key: "standings", labelKey: "stats.tabStandings" },
@@ -97,10 +97,10 @@ export default function Stats() {
   const runChart = useMemo(
     () =>
       (analytics?.players?.topRuns || []).slice(0, 8).map((row) => ({
-        label: row.player?.name || "Player",
+        label: row.player?.name || t("statsExtra.player"),
         value: row.runs || 0,
       })),
-    [analytics]
+    [analytics, t]
   );
 
   const timeline = analytics?.timeline || [];
@@ -109,13 +109,13 @@ export default function Stats() {
   const totals = analytics?.totals || {};
 
   const recordCards = [
-    { key: "highestTeamScore", label: "Highest team total", icon: Flame, accent: "text-lime" },
-    { key: "lowestTeamScore", label: "Lowest team total", icon: Shield, accent: "text-sky" },
-    { key: "highestIndividualScore", label: "Highest individual", icon: Crown, accent: "text-lime" },
-    { key: "lowestIndividualScore", label: "Lowest individual", icon: Activity, accent: "text-white/60" },
-    { key: "bestBowling", label: "Best bowling", icon: Target, accent: "text-coral" },
-    { key: "mostSixesInnings", label: "Most sixes (innings)", icon: Flame, accent: "text-coral" },
-    { key: "mostFoursInnings", label: "Most fours (innings)", icon: Medal, accent: "text-sky" },
+    { key: "highestTeamScore", label: t("statsExtra.highestTeamScore"), icon: Flame, accent: "text-lime" },
+    { key: "lowestTeamScore", label: t("statsExtra.lowestTeamScore"), icon: Shield, accent: "text-sky" },
+    { key: "highestIndividualScore", label: t("statsExtra.highestIndividualScore"), icon: Crown, accent: "text-lime" },
+    { key: "lowestIndividualScore", label: t("statsExtra.lowestIndividualScore"), icon: Activity, accent: "text-white/60" },
+    { key: "bestBowling", label: t("statsExtra.bestBowling"), icon: Target, accent: "text-coral" },
+    { key: "mostSixesInnings", label: t("statsExtra.mostSixesInnings"), icon: Flame, accent: "text-coral" },
+    { key: "mostFoursInnings", label: t("statsExtra.mostFoursInnings"), icon: Medal, accent: "text-sky" },
   ];
 
   return (
@@ -153,14 +153,14 @@ export default function Stats() {
                   <thead>
                     <tr>
                       <th className="w-10">#</th>
-                      <th>Team</th>
-                      <th className="!text-right">P</th>
-                      <th className="!text-right">W</th>
-                      <th className="!text-right">L</th>
-                      <th className="!text-right">T/NR</th>
-                      <th className="!text-right">Pts</th>
-                      <th className="!text-right">NRR</th>
-                      <th>Form</th>
+                      <th>{t("statsExtra.cols.team")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.p")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.w")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.l")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.tnr")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.pts")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.nrr")}</th>
+                      <th>{t("statsExtra.cols.form")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -224,26 +224,26 @@ export default function Stats() {
                   <thead>
                     <tr>
                       <th className="w-10">#</th>
-                      <th>Player</th>
-                      <th className="!text-right">M</th>
+                      <th>{t("statsExtra.cols.player")}</th>
+                      <th className="!text-right">{t("statsExtra.cols.m")}</th>
                       {tab === "batting" ? (
                         <>
-                          <th className="!text-right">Inns</th>
-                          <th className="!text-right">Runs</th>
-                          <th className="!text-right">HS</th>
-                          <th className="!text-right">Avg</th>
-                          <th className="!text-right">SR</th>
-                          <th className="!text-right">4s</th>
-                          <th className="!text-right">6s</th>
+                          <th className="!text-right">{t("statsExtra.cols.inns")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.runs")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.hs")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.avg")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.sr")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.fours")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.sixes")}</th>
                         </>
                       ) : (
                         <>
-                          <th className="!text-right">Overs</th>
-                          <th className="!text-right">Wkts</th>
-                          <th className="!text-right">Best</th>
-                          <th className="!text-right">Econ</th>
-                          <th className="!text-right">Avg</th>
-                          <th className="!text-right">Maidens</th>
+                          <th className="!text-right">{t("statsExtra.cols.overs")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.wkts")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.best")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.econ")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.avg")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.maidens")}</th>
                         </>
                       )}
                     </tr>
@@ -257,7 +257,7 @@ export default function Stats() {
                             <PlayerAvatar player={row.player} size="xs" />
                             <span className="min-w-0">
                               <span className="block truncate text-[12px] font-semibold text-white/85">{row.player?.name}</span>
-                              <span className="block text-[9px] text-white/30">{row.player?.role}{row.player?.country?.code ? ` · ${row.player.country.code}` : ""}</span>
+                              <span className="block text-[9px] text-white/30">{roleLabel(row.player?.role, t)}{row.player?.country?.code ? ` · ${row.player.country.code}` : ""}</span>
                             </span>
                           </Link>
                         </td>
@@ -321,12 +321,12 @@ export default function Stats() {
             <>
               <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-6">
                 {[
-                  { label: "Matches", value: totals.matches || 0, icon: Trophy, accent: "text-lime" },
-                  { label: "Runs", value: totals.runs || 0, icon: TrendingUp, accent: "text-lime" },
-                  { label: "Wickets", value: totals.wickets || 0, icon: Target, accent: "text-coral" },
-                  { label: "Fours", value: totals.fours || 0, icon: Medal, accent: "text-sky" },
-                  { label: "Sixes", value: totals.sixes || 0, icon: Flame, accent: "text-coral" },
-                  { label: "Views", value: Math.max(totals.views || 0, totals.streamViews || 0), icon: Eye, accent: "text-mint" },
+                  { label: t("statsExtra.matches"), value: totals.matches || 0, icon: Trophy, accent: "text-lime" },
+                  { label: t("statsExtra.runs"), value: totals.runs || 0, icon: TrendingUp, accent: "text-lime" },
+                  { label: t("statsExtra.wickets"), value: totals.wickets || 0, icon: Target, accent: "text-coral" },
+                  { label: t("statsExtra.fours"), value: totals.fours || 0, icon: Medal, accent: "text-sky" },
+                  { label: t("statsExtra.sixes"), value: totals.sixes || 0, icon: Flame, accent: "text-coral" },
+                  { label: t("statsExtra.views"), value: Math.max(totals.views || 0, totals.streamViews || 0), icon: Eye, accent: "text-mint" },
                 ].map((card) => {
                   const Icon = card.icon;
                   return (
@@ -347,34 +347,34 @@ export default function Stats() {
                 <div className="card p-4">
                   <div className="mb-2 flex items-start justify-between gap-2">
                     <div>
-                      <p className="flex items-center gap-1.5 text-sm font-bold text-white"><BarChart3 size={14} className="text-lime" /> Most runs</p>
-                      <p className="text-[10px] text-white/35">Top 8 run-scorers across live and finished matches</p>
+                      <p className="flex items-center gap-1.5 text-sm font-bold text-white"><BarChart3 size={14} className="text-lime" /> {t("statsExtra.mostRuns")}</p>
+                      <p className="text-[10px] text-white/35">{t("statsExtra.mostRunsHint")}</p>
                     </div>
-                    <span className="chip">bar</span>
+                    <span className="chip">{t("statsExtra.bar")}</span>
                   </div>
-                  <BarChart data={runChart} color="#c8ff3d" formatValue={(value) => formatNumber(value)} emptyLabel="No runs recorded yet" />
+                  <BarChart data={runChart} color="#c8ff3d" formatValue={(value) => formatNumber(value)} emptyLabel={t("statsExtra.noRuns")} />
                 </div>
 
                 <div className="card p-4">
                   <div className="mb-2 flex items-start justify-between gap-2">
                     <div>
-                      <p className="flex items-center gap-1.5 text-sm font-bold text-white"><LineChartIcon size={14} className="text-sky" /> Match timeline</p>
-                      <p className="text-[10px] text-white/35">Runs and wickets per month</p>
+                      <p className="flex items-center gap-1.5 text-sm font-bold text-white"><LineChartIcon size={14} className="text-sky" /> {t("statsExtra.timeline")}</p>
+                      <p className="text-[10px] text-white/35">{t("statsExtra.timelineHint")}</p>
                     </div>
                     <div className="flex items-center gap-2 text-[9px] font-semibold">
-                      <span className="inline-flex items-center gap-1 text-lime"><span className="h-1.5 w-1.5 rounded-full bg-lime" /> runs</span>
-                      <span className="inline-flex items-center gap-1 text-coral"><span className="h-1.5 w-1.5 rounded-full bg-coral" /> wickets</span>
+                      <span className="inline-flex items-center gap-1 text-lime"><span className="h-1.5 w-1.5 rounded-full bg-lime" /> {t("statsExtra.runs")}</span>
+                      <span className="inline-flex items-center gap-1 text-coral"><span className="h-1.5 w-1.5 rounded-full bg-coral" /> {t("statsExtra.wickets")}</span>
                     </div>
                   </div>
                   <LineChart
                     data={timeline}
                     xKey="label"
                     series={[
-                      { key: "runs", label: "Runs", color: "#c8ff3d" },
-                      { key: "wickets", label: "Wickets", color: "#ff6b6b" },
+                      { key: "runs", label: t("statsExtra.runs"), color: "#c8ff3d" },
+                      { key: "wickets", label: t("statsExtra.wickets"), color: "#ff6b6b" },
                     ]}
                     formatValue={(value) => formatNumber(value)}
-                    emptyLabel="Finish a match to start the timeline"
+                    emptyLabel={t("statsExtra.timelineEmpty")}
                   />
                 </div>
               </div>
@@ -383,10 +383,10 @@ export default function Stats() {
                 <div className="card p-4">
                   <div className="mb-3 flex items-start justify-between gap-2">
                     <div>
-                      <p className="flex items-center gap-1.5 text-sm font-bold text-white"><Percent size={14} className="text-mint" /> Winning percentage</p>
-                      <p className="text-[10px] text-white/35">Teams compared by win rate, then matches played</p>
+                      <p className="flex items-center gap-1.5 text-sm font-bold text-white"><Percent size={14} className="text-mint" /> {t("statsExtra.winPct")}</p>
+                      <p className="text-[10px] text-white/35">{t("statsExtra.winPctHint")}</p>
                     </div>
-                    <span className="chip"><Swords size={10} /> {teamRows.length} teams</span>
+                    <span className="chip"><Swords size={10} /> {t("statsExtra.teams", { count: teamRows.length })}</span>
                   </div>
                   <HorizontalBars
                     rows={teamRows.slice(0, 10).map((row) => ({
@@ -403,13 +403,13 @@ export default function Stats() {
                     <table className="table-base min-w-[520px]">
                       <thead>
                         <tr>
-                          <th>Team</th>
-                          <th className="!text-right">P</th>
-                          <th className="!text-right">W</th>
-                          <th className="!text-right">L</th>
-                          <th className="!text-right">Win %</th>
-                          <th className="!text-right">HS</th>
-                          <th className="!text-right">NRR</th>
+                          <th>{t("statsExtra.cols.team")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.p")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.w")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.l")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.winPct")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.hs")}</th>
+                          <th className="!text-right">{t("statsExtra.cols.nrr")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -435,15 +435,15 @@ export default function Stats() {
                 </div>
 
                 <div className="card p-4">
-                  <p className="flex items-center gap-1.5 text-sm font-bold text-white"><Trophy size={14} className="text-lime" /> Leaders</p>
-                  <p className="text-[10px] text-white/35">Auto-computed awards and impact numbers</p>
+                  <p className="flex items-center gap-1.5 text-sm font-bold text-white"><Trophy size={14} className="text-lime" /> {t("statsExtra.leaders")}</p>
+                  <p className="text-[10px] text-white/35">{t("statsExtra.leadersHint")}</p>
                   <div className="mt-3 space-y-2">
                     {(analytics?.players?.topPom || []).slice(0, 4).map((row, index) => (
                       <Link key={row.player?._id || index} to={`/players/${row.player?._id}`} className="flex items-center gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 transition hover:border-lime/30">
                         <PlayerAvatar player={row.player} size="xs" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[11px] font-semibold text-white/80">{row.player?.name}</span>
-                          <span className="block text-[9px] text-white/35">{row.pom} player-of-match · {row.matches} matches</span>
+                          <span className="block text-[9px] text-white/35">{t("statsExtra.pomLine", { pom: row.pom, matches: row.matches })}</span>
                         </span>
                         <Medal size={13} className="shrink-0 text-lime" />
                       </Link>
@@ -453,13 +453,13 @@ export default function Stats() {
                         <PlayerAvatar player={row.player} size="xs" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[11px] font-semibold text-white/80">{row.player?.name}</span>
-                          <span className="block text-[9px] text-white/35">{row.wickets} wickets · econ {row.economy}</span>
+                          <span className="block text-[9px] text-white/35">{t("statsExtra.wicketsLine", { wickets: row.wickets, economy: row.economy })}</span>
                         </span>
                         <Target size={13} className="shrink-0 text-coral" />
                       </Link>
                     ))}
                     {!(analytics?.players?.topPom || []).length && !(analytics?.players?.topWickets || []).length && (
-                      <p className="rounded-xl border border-dashed border-white/10 p-4 text-center text-[11px] text-white/30">Leaders appear after the first completed match.</p>
+                      <p className="rounded-xl border border-dashed border-white/10 p-4 text-center text-[11px] text-white/30">{t("statsExtra.leadersEmpty")}</p>
                     )}
                   </div>
                 </div>
@@ -468,10 +468,10 @@ export default function Stats() {
               <div className="card p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div>
-                    <p className="flex items-center gap-1.5 text-sm font-bold text-white"><Crown size={14} className="text-lime" /> Auto-computed records</p>
-                    <p className="text-[10px] text-white/35">Recalculated from every scorecard — no manual entry</p>
+                    <p className="flex items-center gap-1.5 text-sm font-bold text-white"><Crown size={14} className="text-lime" /> {t("statsExtra.records")}</p>
+                    <p className="text-[10px] text-white/35">{t("statsExtra.recordsHint")}</p>
                   </div>
-                  {analytics?.generatedAt && <span className="hidden text-[9px] text-white/25 sm:block">updated {timeAgo(analytics.generatedAt)}</span>}
+                  {analytics?.generatedAt && <span className="hidden text-[9px] text-white/25 sm:block">{t("statsExtra.updated", { when: timeAgo(analytics.generatedAt) })}</span>}
                 </div>
                 <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
                   {recordCards.map((card) => {
@@ -488,7 +488,7 @@ export default function Stats() {
                             <p className="truncate text-[10px] text-white/35">{record.detail || record.series || ""}</p>
                           </>
                         ) : (
-                          <p className="mt-1.5 text-[11px] text-white/25">Not recorded yet</p>
+                          <p className="mt-1.5 text-[11px] text-white/25">{t("statsExtra.notRecorded")}</p>
                         )}
                       </div>
                     );

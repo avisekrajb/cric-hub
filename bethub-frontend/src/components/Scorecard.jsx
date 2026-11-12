@@ -1,4 +1,5 @@
 import { PlayerAvatar } from "./common/Avatars";
+import { useI18n } from "../contexts/LanguageContext";
 import { cn, oversOf, playerName, runRate, teamName } from "../lib/utils";
 
 const findPlayer = (player, match) => {
@@ -13,6 +14,7 @@ const findPlayer = (player, match) => {
 };
 
 function BattingTable({ innings, match }) {
+  const { t } = useI18n();
   const rows = innings.batting || [];
   const strikerId = String(innings.striker?._id || innings.striker || "");
   const nonStrikerId = String(innings.nonStriker?._id || innings.nonStriker || "");
@@ -25,12 +27,12 @@ function BattingTable({ innings, match }) {
       <table className="table-base min-w-[520px]">
         <thead>
           <tr>
-            <th>Batter</th>
-            <th className="!text-right">R</th>
-            <th className="!text-right">B</th>
-            <th className="!text-right">4s</th>
-            <th className="!text-right">6s</th>
-            <th className="!text-right">SR</th>
+            <th>{t("scorecard.batter")}</th>
+            <th className="!text-right">{t("scorecard.r")}</th>
+            <th className="!text-right">{t("scorecard.b")}</th>
+            <th className="!text-right">{t("scorecard.fours")}</th>
+            <th className="!text-right">{t("scorecard.sixes")}</th>
+            <th className="!text-right">{t("scorecard.sr")}</th>
           </tr>
         </thead>
         <tbody>
@@ -47,10 +49,10 @@ function BattingTable({ innings, match }) {
                       <p className={cn("flex items-center gap-1.5 text-[13px] font-semibold", isStriker ? "text-lime" : "text-white/90")}>
                         {playerName(player)}
                         {isStriker && <span className="text-lime">*</span>}
-                        {isNonStriker && <span className="text-[9px] text-white/30">non-striker</span>}
+                        {isNonStriker && <span className="text-[9px] text-white/30">{t("scorecard.nonStriker")}</span>}
                       </p>
                       <p className="max-w-[280px] truncate text-[10px] text-white/35">
-                        {row.out ? row.dismissal?.text || "out" : isStriker || isNonStriker ? "batting" : "not out"}
+                        {row.out ? row.dismissal?.text || t("scorecard.out") : isStriker || isNonStriker ? t("scorecard.batting") : t("scorecard.notOut")}
                       </p>
                     </div>
                   </div>
@@ -67,16 +69,16 @@ function BattingTable({ innings, match }) {
       </table>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/45">
         <p>
-          <span className="font-semibold text-white/60">Extras</span> {Object.values(innings.extras || {}).reduce((a, b) => a + (Number(b) || 0), 0)} ·{" "}
-          {Object.entries(innings.extras || {}).filter(([, value]) => value).map(([key, value]) => `${key} ${value}`).join(", ") || "none"}
+          <span className="font-semibold text-white/60">{t("scorecard.extras")}</span> {Object.values(innings.extras || {}).reduce((a, b) => a + (Number(b) || 0), 0)} ·{" "}
+          {Object.entries(innings.extras || {}).filter(([, value]) => value).map(([key, value]) => `${key} ${value}`).join(", ") || t("scorecard.none")}
         </p>
         <p>
-          <span className="font-semibold text-white/60">Total</span> {innings.runs}/{innings.wickets} ({innings.overs} ov) · RR {runRate(innings.runs, innings.balls)}
+          <span className="font-semibold text-white/60">{t("scorecard.total")}</span> {innings.runs}/{innings.wickets} ({innings.overs} ov) · {t("scorecard.rr", { rate: runRate(innings.runs, innings.balls) })}
         </p>
       </div>
       {yetToBat.length > 0 && (
         <div className="mt-2 rounded-lg border border-white/[0.05] bg-white/[0.02] p-2.5">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-white/30">Yet to bat</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-white/30">{t("scorecard.yetToBat")}</p>
           <p className="mt-0.5 text-[11px] text-white/45">
             {yetToBat.map((row) => playerName(findPlayer(row.player, match))).join(" · ")}
           </p>
@@ -87,18 +89,19 @@ function BattingTable({ innings, match }) {
 }
 
 function BowlingTable({ innings, match }) {
+  const { t } = useI18n();
   return (
     <div className="mt-4 overflow-x-auto">
-      <p className="mb-1 px-1 text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">Bowling</p>
+      <p className="mb-1 px-1 text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">{t("scorecard.bowling")}</p>
       <table className="table-base min-w-[480px]">
         <thead>
           <tr>
-            <th>Bowler</th>
-            <th className="!text-right">O</th>
-            <th className="!text-right">M</th>
-            <th className="!text-right">R</th>
-            <th className="!text-right">W</th>
-            <th className="!text-right">Econ</th>
+            <th>{t("scorecard.bowler")}</th>
+            <th className="!text-right">{t("scorecard.o")}</th>
+            <th className="!text-right">{t("scorecard.m")}</th>
+            <th className="!text-right">{t("scorecard.r")}</th>
+            <th className="!text-right">{t("scorecard.wkts")}</th>
+            <th className="!text-right">{t("scorecard.econ")}</th>
           </tr>
         </thead>
         <tbody>
@@ -128,10 +131,11 @@ function BowlingTable({ innings, match }) {
 }
 
 function FallOfWickets({ innings, match }) {
+  const { t } = useI18n();
   if (!innings.fow?.length) return null;
   return (
     <div className="mt-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3">
-      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">Fall of wickets</p>
+      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/30">{t("scorecard.fow")}</p>
       <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-white/55">
         {innings.fow.map((row) => (
           <span key={row.wicket}>
@@ -146,9 +150,10 @@ function FallOfWickets({ innings, match }) {
 }
 
 export default function Scorecard({ match }) {
+  const { t } = useI18n();
   const innings = [...(match?.innings || [])].sort((a, b) => a.number - b.number);
   if (!innings.length) {
-    return <p className="rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">The scorecard will appear once the match begins.</p>;
+    return <p className="rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">{t("scorecard.empty")}</p>;
   }
 
   return (
@@ -161,13 +166,13 @@ export default function Scorecard({ match }) {
               <div className="flex items-center gap-2">
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-lime/10 text-xs font-bold text-lime">{inningsRow.number + 1}</span>
                 <div>
-                  <p className="text-sm font-bold text-white">{teamName(team)} <span className="font-normal text-white/35">innings</span></p>
-                  <p className="text-[10px] text-white/35">{inningsRow.completed ? "completed" : "in progress"} · {inningsRow.overs} overs</p>
+                  <p className="text-sm font-bold text-white">{teamName(team)} <span className="font-normal text-white/35">{t("scorecard.innings")}</span></p>
+                  <p className="text-[10px] text-white/35">{inningsRow.completed ? t("scorecard.completed") : t("scorecard.inProgress")} · {t("scorecard.oversCount", { n: inningsRow.overs })}</p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-mono text-xl font-bold text-lime">{inningsRow.runs}/{inningsRow.wickets}</p>
-                <p className="text-[10px] text-white/35">RR {runRate(inningsRow.runs, inningsRow.balls)}</p>
+                <p className="text-[10px] text-white/35">{t("scorecard.rr", { rate: runRate(inningsRow.runs, inningsRow.balls) })}</p>
               </div>
             </div>
             <div className="p-3 sm:p-4">
@@ -181,7 +186,7 @@ export default function Scorecard({ match }) {
       {match?.result?.text && (
         <div className="rounded-xl border border-lime/20 bg-lime/[0.06] px-4 py-3 text-sm font-semibold text-lime">
           {match.result.text}
-          {match.playerOfMatch?.name && <span className="ml-2 text-[11px] font-normal text-white/45">Player of the match: {match.playerOfMatch.name}</span>}
+          {match.playerOfMatch?.name && <span className="ml-2 text-[11px] font-normal text-white/45">{t("scorecard.pom", { name: match.playerOfMatch.name })}</span>}
         </div>
       )}
     </div>

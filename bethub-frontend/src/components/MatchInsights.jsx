@@ -1,7 +1,9 @@
 import { Activity, ArrowUpRight, Gauge, Target, Zap } from "lucide-react";
+import { useI18n } from "../contexts/LanguageContext";
 import { cn, formatNumber, runRate, teamName } from "../lib/utils";
 
 export function WinProbability({ match, insights }) {
+  const { t } = useI18n();
   if (!insights) return null;
   const current = match?.innings?.[match.currentInnings];
   const probability = Math.round(insights.winProbability ?? 50);
@@ -14,9 +16,9 @@ export function WinProbability({ match, insights }) {
     <div className="card p-4">
       <div className="mb-3 flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
-          <Gauge size={13} className="text-lime" /> Win predictor
+          <Gauge size={13} className="text-lime" /> {t("insights.winPredictor")}
         </p>
-        <span className="chip !px-2 !py-0.5 !text-[9px]">live model</span>
+        <span className="chip !px-2 !py-0.5 !text-[9px]">{t("insights.liveModel")}</span>
       </div>
       <div className="mb-2 flex items-end justify-between">
         <div>
@@ -32,12 +34,13 @@ export function WinProbability({ match, insights }) {
         <span className="h-full rounded-full bg-gradient-to-r from-lime-deep to-lime transition-all duration-700" style={{ width: `${battingPct}%` }} />
         <span className="h-full flex-1 bg-gradient-to-r from-white/20 to-white/10 transition-all duration-700" />
       </div>
-      <p className="mt-2 text-[10px] text-white/30">Updates after every delivery · not betting advice.</p>
+      <p className="mt-2 text-[10px] text-white/30">{t("insights.disclaimer")}</p>
     </div>
   );
 }
 
 export function WormChart({ match, insights }) {
+  const { t } = useI18n();
   if (!insights?.worm?.length) return null;
   const maxOver = Math.max(1, match?.overs || 20, ...insights.worm.map((row) => row.points?.at(-1)?.over || 0));
   const maxRuns = Math.max(30, ...insights.worm.map((row) => row.runs || 0), ...insights.worm.flatMap((row) => (row.points || []).map((p) => p.runs)));
@@ -54,7 +57,7 @@ export function WormChart({ match, insights }) {
     <div className="card p-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
-          <Activity size={13} className="text-lime" /> Run worm
+          <Activity size={13} className="text-lime" /> {t("insights.runWorm")}
         </p>
         <div className="flex flex-wrap gap-2">
           {insights.worm.map((row, index) => (
@@ -66,7 +69,7 @@ export function WormChart({ match, insights }) {
         </div>
       </div>
       <div className="w-full overflow-hidden">
-        <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="Runs per over chart">
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label={t("insights.runsPerOver")}>
           {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
             <g key={ratio}>
               <line x1={pad.left} x2={width - pad.right} y1={pad.top + plotH * ratio} y2={pad.top + plotH * ratio} stroke="rgba(255,255,255,.06)" strokeDasharray="3 5" />
@@ -97,13 +100,14 @@ export function WormChart({ match, insights }) {
 }
 
 export function InsightTiles({ match, insights }) {
+  const { t } = useI18n();
   if (!insights) return null;
   const current = match?.innings?.[match.currentInnings];
   const tiles = [
-    { label: "CRR", value: insights.currentRunRate?.toFixed(2) ?? runRate(current?.runs, current?.balls), icon: Zap, tone: "text-lime" },
-    { label: "Required", value: insights.requiredRunRate != null ? insights.requiredRunRate.toFixed(2) : "—", icon: Target, tone: "text-sky" },
-    { label: "Need", value: insights.required != null ? `${insights.required} off ${insights.ballsLeft}` : "—", icon: ArrowUpRight, tone: "text-white" },
-    { label: "Projected", value: insights.projected ? formatNumber(insights.projected) : "—", icon: Activity, tone: "text-white/70" },
+    { label: t("insights.crr"), value: insights.currentRunRate?.toFixed(2) ?? runRate(current?.runs, current?.balls), icon: Zap, tone: "text-lime" },
+    { label: t("insights.required"), value: insights.requiredRunRate != null ? insights.requiredRunRate.toFixed(2) : "—", icon: Target, tone: "text-sky" },
+    { label: t("insights.need"), value: insights.required != null ? `${insights.required} off ${insights.ballsLeft}` : "—", icon: ArrowUpRight, tone: "text-white" },
+    { label: t("insights.projected"), value: insights.projected ? formatNumber(insights.projected) : "—", icon: Activity, tone: "text-white/70" },
   ];
   return (
     <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
@@ -120,43 +124,44 @@ export function InsightTiles({ match, insights }) {
 }
 
 export function PartnershipCard({ insights }) {
+  const { t } = useI18n();
   if (!insights) return null;
   const partnership = insights.partnership;
   const last5 = insights.last5Overs || [];
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="card p-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Current partnership</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">{t("insights.partnership")}</p>
         {partnership ? (
           <>
-            <p className="mt-1 text-xl font-extrabold text-white">{partnership.runs} <span className="text-sm font-medium text-white/40">runs</span></p>
-            <p className="mt-0.5 text-[11px] text-white/45">{partnership.balls} balls · {partnership.playerA?.name || "—"} &amp; {partnership.playerB?.name || "—"}</p>
+            <p className="mt-1 text-xl font-extrabold text-white">{partnership.runs} <span className="text-sm font-medium text-white/40">{t("insights.runs")}</span></p>
+            <p className="mt-0.5 text-[11px] text-white/45">{t("insights.partnershipLine", { balls: partnership.balls, a: partnership.playerA?.name || "—", b: partnership.playerB?.name || "—" })}</p>
           </>
         ) : (
-          <p className="mt-2 text-sm text-white/40">No active partnership</p>
+          <p className="mt-2 text-sm text-white/40">{t("insights.noPartnership")}</p>
         )}
         <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-          <span className="rounded-lg bg-white/[0.03] p-2"><span className="block text-white/35">Wickets left</span><span className="font-bold text-white/80">{insights.wicketsLeft}</span></span>
-          <span className="rounded-lg bg-white/[0.03] p-2"><span className="block text-white/35">Overs left</span><span className="font-bold text-white/80">{insights.oversLeft?.toFixed(1)}</span></span>
+          <span className="rounded-lg bg-white/[0.03] p-2"><span className="block text-white/35">{t("insights.wicketsLeft")}</span><span className="font-bold text-white/80">{insights.wicketsLeft}</span></span>
+          <span className="rounded-lg bg-white/[0.03] p-2"><span className="block text-white/35">{t("insights.oversLeft")}</span><span className="font-bold text-white/80">{insights.oversLeft?.toFixed(1)}</span></span>
         </div>
       </div>
       <div className="card p-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Last 5 overs</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">{t("insights.last5")}</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {last5.length ? (
             last5.map((over) => (
               <div key={over.over} className="min-w-[52px] rounded-lg border border-white/[0.06] bg-white/[0.03] px-2 py-1.5 text-center">
-                <p className="text-[9px] text-white/35">OV {over.over}</p>
+                <p className="text-[9px] text-white/35">{t("detail.overShort", { n: over.over })}</p>
                 <p className="font-mono text-sm font-bold text-white/85">{over.runs}</p>
-                <p className="text-[9px] text-white/30">{over.wickets} wkt</p>
+                <p className="text-[9px] text-white/30">{t("insights.wkt", { n: over.wickets })}</p>
               </div>
             ))
           ) : (
-            <p className="text-xs text-white/35">No completed overs yet</p>
+            <p className="text-xs text-white/35">{t("insights.noOvers")}</p>
           )}
         </div>
         {last5.length > 0 && (
-          <p className="mt-3 text-[10px] text-white/35">{insights.last5Runs} runs in the last five overs · {insights.last5Runs / Math.min(5, last5.length || 1) > 9 ? "scoring freely" : "bowlers on top"}</p>
+          <p className="mt-3 text-[10px] text-white/35">{t("insights.last5Summary", { runs: insights.last5Runs, tone: insights.last5Runs / Math.min(5, last5.length || 1) > 9 ? t("insights.scoringFreely") : t("insights.bowlersOnTop") })}</p>
         )}
       </div>
     </div>

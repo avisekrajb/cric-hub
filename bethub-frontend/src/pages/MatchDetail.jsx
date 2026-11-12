@@ -29,18 +29,15 @@ import { EmptyState, ErrorState, PageLoader } from "../components/common/States"
 import { useFetch } from "../hooks/useFetch";
 import { useMatchView } from "../hooks/useMatchView";
 import { useSocket, useSocketEvent } from "../contexts/SocketContext";
+import { useI18n } from "../contexts/LanguageContext";
 import { useToast } from "../contexts/ToastContext";
-import { cn, chaseInfo, copyText, formatDateTime, formatNumber, matchViews, resultText, runRate, statusLabel, teamName, timeAgo } from "../lib/utils";
+import { cn, chaseInfo, copyText, formatDateTime, formatNumber, matchViews, resultText, runRate, teamName, timeAgo } from "../lib/utils";
 
-const tabs = [
-  { key: "live", label: "Live centre" },
-  { key: "scorecard", label: "Scorecard" },
-  { key: "commentary", label: "Commentary" },
-  { key: "squads", label: "Squads" },
-  { key: "insights", label: "Insights" },
-];
+const statusTranslationKey = (status) =>
+  ({ live: "live", "innings-break": "inningsBreak", finished: "finished", upcoming: "upcoming", abandoned: "abandoned" }[status]);
 
 function TeamBlock({ team, innings, isBatting, isWinner, live }) {
+  const { t } = useI18n();
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
       <TeamLogo team={team} size="lg" ring={isBatting && live} />
@@ -53,7 +50,7 @@ function TeamBlock({ team, innings, isBatting, isWinner, live }) {
             <span className="ml-1.5 text-[11px] font-medium text-white/35">({innings.overs})</span>
           </p>
         ) : (
-          <p className="mt-0.5 text-sm text-white/25">Yet to bat</p>
+          <p className="mt-0.5 text-sm text-white/25">{t("detail.yetToBat")}</p>
         )}
       </div>
     </div>
@@ -62,6 +59,7 @@ function TeamBlock({ team, innings, isBatting, isWinner, live }) {
 
 export default function MatchDetail() {
   const { id } = useParams();
+  const { t } = useI18n();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") || "live";
   const { data, loading, error, refetch, setData } = useFetch(`/api/matches/${id}`, { deps: [id], poll: 60000 });
@@ -77,6 +75,16 @@ export default function MatchDetail() {
   useMatchView(match);
   const chase = chaseInfo(match);
   const views = matchViews(match);
+  const tabs = useMemo(
+    () => [
+      { key: "live", label: t("detail.tabLive") },
+      { key: "scorecard", label: t("detail.tabScorecard") },
+      { key: "commentary", label: t("detail.tabCommentary") },
+      { key: "squads", label: t("detail.tabSquads") },
+      { key: "insights", label: t("detail.tabInsights") },
+    ],
+    [t]
+  );
 
   useEffect(() => {
     if (!match) return undefined;
@@ -135,14 +143,14 @@ export default function MatchDetail() {
     const ok = await copyText(window.location.href);
     if (ok) {
       setCopied(true);
-      success("Match link copied");
+      success(t("detail.copySuccess"));
       setTimeout(() => setCopied(false), 1800);
     } else {
-      toastError("Could not copy the link");
+      toastError(t("detail.copyError"));
     }
   };
 
-  if (loading && !match) return <PageLoader label="Loading the match centre…" />;
+  if (loading && !match) return <PageLoader label={t("detail.loading")} />;
   if (error && !match) return <div className="container-x py-10"><ErrorState message={error} onRetry={() => refetch()} /></div>;
   if (!match) return null;
 
@@ -156,7 +164,7 @@ export default function MatchDetail() {
   return (
     <div className="container-x py-5 sm:py-7">
       <Link to="/live" className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-white/40 transition hover:text-lime">
-        <ArrowLeft size={13} /> Back to scores
+        <ArrowLeft size={13} /> {t("detail.back")}
       </Link>
 
       <div className="card relative overflow-hidden">
@@ -166,10 +174,10 @@ export default function MatchDetail() {
             <StatusPill status={match.status} />
             <span className="text-[11px] font-semibold text-white/55">{match.series}</span>
             <span className="text-[11px] text-white/25">·</span>
-            <span className="text-[11px] text-white/35">{match.format} · Match {match.matchNumber}</span>
+            <span className="text-[11px] text-white/35">{match.format} · {t("detail.matchNumber", { number: match.matchNumber })}</span>
           </div>
           <div className="flex items-center gap-2 text-[10px] text-white/30">
-            {connected && <span className="inline-flex items-center gap-1 text-mint"><span className="h-1.5 w-1.5 rounded-full bg-mint" /> realtime</span>}
+            {connected && <span className="inline-flex items-center gap-1 text-mint"><span className="h-1.5 w-1.5 rounded-full bg-mint" /> {t("detail.realtime")}</span>}
             {(watchers > 0 || match.stream?.viewers > 0) && <span className="inline-flex items-center gap-1"><Users size={11} /> {formatNumber(watchers || match.stream?.viewers)}</span>}
             <span className="inline-flex items-center gap-1"><Eye size={11} /> {formatNumber(views)}</span>
           </div>
@@ -179,8 +187,8 @@ export default function MatchDetail() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
             <TeamBlock team={match.teamA} innings={teamInnings.A} isBatting={battingSlot === "A"} isWinner={winnerId === String(match.teamA?._id)} live={live} />
             <div className="hidden shrink-0 flex-col items-center sm:flex">
-              <span className="font-display text-xs font-700 uppercase tracking-[0.2em] text-white/20">vs</span>
-              {match.stream?.isLive && <LiveBadge className="mt-2" label="VIDEO" />}
+              <span className="font-display text-xs font-700 uppercase tracking-[0.2em] text-white/20">{t("detail.vs")}</span>
+              {match.stream?.isLive && <LiveBadge className="mt-2" label={t("detail.videoTag")} />}
             </div>
             <div className="h-px w-full bg-white/[0.06] sm:hidden" />
             <TeamBlock team={match.teamB} innings={teamInnings.B} isBatting={battingSlot === "B"} isWinner={winnerId === String(match.teamB?._id)} live={live} />
@@ -196,9 +204,11 @@ export default function MatchDetail() {
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-lime/15 bg-lime/[0.05] px-3 py-2 text-[11px]">
               <span className="font-bold text-lime">{teamName(current.battingTeam)} {current.runs}/{current.wickets} ({current.overs})</span>
               {chase ? (
-                <span className="text-white/55">Need <b className="text-white/85">{chase.runsNeeded}</b> from <b className="text-white/85">{chase.ballsLeft}</b> balls ({chase.oversLeft} ov) · RRR {chase.requiredRate}</span>
+                <span className="text-white/55">
+                  {t("detail.need", { runs: chase.runsNeeded, balls: chase.ballsLeft, overs: chase.oversLeft, rate: chase.requiredRate })}
+                </span>
               ) : (
-                <span className="text-white/55">CRR {runRate(current.runs, current.balls)} · {Math.max(0, match.overs * 6 - current.balls)} balls left</span>
+                <span className="text-white/55">{t("detail.crr", { rate: runRate(current.runs, current.balls), balls: Math.max(0, match.overs * 6 - current.balls) })}</span>
               )}
               {current.striker && (
                 <span className="ml-auto hidden text-white/40 sm:block">
@@ -208,24 +218,24 @@ export default function MatchDetail() {
             </div>
           ) : match.status === "finished" ? (
             <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-lime/20 bg-lime/[0.06] px-3 py-2 text-[12px] font-semibold text-lime">
-              <Trophy size={13} /> {resultText(match) || "Match finished"}
-              {match.playerOfMatch?.name && <span className="text-[10px] font-normal text-white/45">· POM {match.playerOfMatch.name}</span>}
+              <Trophy size={13} /> {resultText(match) || t("detail.finished")}
+              {match.playerOfMatch?.name && <span className="text-[10px] font-normal text-white/45">· {t("detail.pomShort", { name: match.playerOfMatch.name })}</span>}
             </div>
           ) : (
             <div className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-[11px] text-white/40">
-              {match.status === "upcoming" ? `Starts ${timeAgo(match.startTime)} · ${match.format} · ${match.overs} overs` : statusLabel(match.status)}
+              {match.status === "upcoming" ? t("detail.starts", { when: timeAgo(match.startTime), format: match.format, overs: match.overs }) : t(`status.${statusTranslationKey(match.status)}`)}
             </div>
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
             {match.stream?.isLive && match.stream?.slug && (
-              <Link to={`/live/${match.stream.slug}`} className="btn-primary btn-xs"><Tv size={13} /> Watch live video</Link>
+              <Link to={`/live/${match.stream.slug}`} className="btn-primary btn-xs"><Tv size={13} /> {t("detail.watchLiveVideo")}</Link>
             )}
             {!match.stream?.isLive && match.stream?.recordingUrl && (
-              <Link to={`/live/${match.stream.slug || match._id}`} className="btn-ghost btn-xs"><Tv size={13} /> Watch replay</Link>
+              <Link to={`/live/${match.stream.slug || match._id}`} className="btn-ghost btn-xs"><Tv size={13} /> {t("detail.watchReplay")}</Link>
             )}
-            <button onClick={copy} className="btn-ghost btn-xs">{copied ? <Check size={13} className="text-mint" /> : <Share2 size={13} />} {copied ? "Copied" : "Share"}</button>
-            <span className="chip !text-[10px]"><Radio size={10} className="text-lime" /> ball-by-ball live</span>
+            <button onClick={copy} className="btn-ghost btn-xs">{copied ? <Check size={13} className="text-mint" /> : <Share2 size={13} />} {copied ? t("detail.copied") : t("detail.share")}</button>
+            <span className="chip !text-[10px]"><Radio size={10} className="text-lime" /> {t("detail.ballByBallLive")}</span>
           </div>
         </div>
       </div>
@@ -245,13 +255,13 @@ export default function MatchDetail() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <WinProbability match={match} insights={insights} />
                     <div className="card p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Match pulse</p>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">{t("detail.pulse")}</p>
                       <div className="mt-2 space-y-2 text-[12px]">
-                        <p className="flex items-center justify-between"><span className="text-white/40">Innings</span><span className="font-semibold text-white/80">{current.number + 1} of 2</span></p>
-                        <p className="flex items-center justify-between"><span className="text-white/40">Overs bowled</span><span className="font-mono text-white/80">{current.overs} / {match.overs}</span></p>
-                        <p className="flex items-center justify-between"><span className="text-white/40">Run rate</span><span className="font-mono text-white/80">{runRate(current.runs, current.balls)}</span></p>
-                        <p className="flex items-center justify-between"><span className="text-white/40">Extras</span><span className="font-mono text-white/80">{Object.values(current.extras || {}).reduce((a, b) => a + Number(b || 0), 0)}</span></p>
-                        <p className="flex items-center justify-between"><span className="text-white/40">Last 5 overs</span><span className="font-mono text-white/80">{insights?.last5Runs ?? "—"} runs</span></p>
+                        <p className="flex items-center justify-between"><span className="text-white/40">{t("detail.innings")}</span><span className="font-semibold text-white/80">{t("detail.of", { n: current.number + 1 })}</span></p>
+                        <p className="flex items-center justify-between"><span className="text-white/40">{t("detail.oversBowled")}</span><span className="font-mono text-white/80">{current.overs} / {match.overs}</span></p>
+                        <p className="flex items-center justify-between"><span className="text-white/40">{t("detail.runRate")}</span><span className="font-mono text-white/80">{runRate(current.runs, current.balls)}</span></p>
+                        <p className="flex items-center justify-between"><span className="text-white/40">{t("detail.extras")}</span><span className="font-mono text-white/80">{Object.values(current.extras || {}).reduce((a, b) => a + Number(b || 0), 0)}</span></p>
+                        <p className="flex items-center justify-between"><span className="text-white/40">{t("detail.last5")}</span><span className="font-mono text-white/80">{insights?.last5Runs != null ? t("detail.runs", { n: insights.last5Runs }) : "—"}</span></p>
                       </div>
                     </div>
                   </div>
@@ -259,7 +269,7 @@ export default function MatchDetail() {
                   <WormChart match={match} insights={insights} />
                 </>
               ) : (
-                <EmptyState icon={<Radio size={20} />} title="Match not started" text="Follow this page — the live centre switches on automatically when the first ball is bowled." />
+                <EmptyState icon={<Radio size={20} />} title={t("detail.notStarted")} text={t("detail.notStartedText")} />
               )}
             </div>
           )}
@@ -275,21 +285,21 @@ export default function MatchDetail() {
                 <PartnershipCard insights={insights} />
                 <WormChart match={match} insights={insights} />
                 <div className="card p-4">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">Recent overs</p>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">{t("detail.recentOvers")}</p>
                   <div className="flex flex-wrap gap-2">
                     {(insights?.last5Overs || []).map((over) => (
                       <div key={over.over} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-1.5 text-center">
-                        <p className="text-[9px] text-white/30">OV {over.over}</p>
+                        <p className="text-[9px] text-white/30">{t("detail.overShort", { n: over.over })}</p>
                         <p className="font-mono text-sm font-bold text-white/80">{over.runs}</p>
                         <p className="text-[9px] text-white/25">{over.wickets}W</p>
                       </div>
                     ))}
-                    {!insights?.last5Overs?.length && <p className="text-xs text-white/35">No overs bowled yet.</p>}
+                    {!insights?.last5Overs?.length && <p className="text-xs text-white/35">{t("detail.noOvers")}</p>}
                   </div>
                 </div>
               </div>
             ) : (
-              <EmptyState icon={<Trophy size={20} />} title="Insights unlock at the first ball" />
+              <EmptyState icon={<Trophy size={20} />} title={t("detail.insightsLocked")} />
             )
           )}
         </div>
@@ -300,20 +310,20 @@ export default function MatchDetail() {
               <LiveVideoPlayer match={match} />
               <div className="mt-2 flex items-center justify-between gap-2">
                 <p className="text-[11px] text-white/40">
-                  {match.stream?.isLive ? "Live from the ground" : "Match replay available"}
+                  {match.stream?.isLive ? t("detail.liveFromGround") : t("detail.replayAvailable")}
                 </p>
                 {match.stream?.isLive && match.stream?.slug && (
-                  <Link to={`/live/${match.stream.slug}`} className="text-[11px] font-semibold text-lime hover:underline">Open live page →</Link>
+                  <Link to={`/live/${match.stream.slug}`} className="text-[11px] font-semibold text-lime hover:underline">{t("detail.openLive")}</Link>
                 )}
               </div>
             </div>
           ) : (
             <div className="card relative overflow-hidden p-5">
               <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-lime/10 blur-2xl" />
-              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-lime"><Tv size={12} /> Video</p>
-              <p className="mt-1 text-sm font-semibold text-white/80">No live video for this match</p>
-              <p className="mt-1 text-[11px] text-white/35">When the host goes live from the admin console, the floating player will appear here automatically.</p>
-              <Link to="/videos" className="btn-ghost btn-xs mt-3">Browse highlights</Link>
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-lime"><Tv size={12} /> {t("detail.video")}</p>
+              <p className="mt-1 text-sm font-semibold text-white/80">{t("detail.noVideo")}</p>
+              <p className="mt-1 text-[11px] text-white/35">{t("detail.noVideoText")}</p>
+              <Link to="/videos" className="btn-ghost btn-xs mt-3">{t("detail.browseHighlights")}</Link>
             </div>
           )}
           <Reactions matchId={match._id} />

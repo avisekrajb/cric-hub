@@ -5,6 +5,7 @@ import {
   LANGUAGE_STORAGE_KEY,
   translations,
 } from "../i18n/translations";
+import { detailTranslations } from "../i18n/detailTranslations";
 
 const LanguageContext = createContext(null);
 
@@ -52,9 +53,12 @@ export function LanguageProvider({ children }) {
 
   const t = useCallback(
     (path, vars) => {
-      const current = translations[language];
-      const fallback = translations[DEFAULT_LANGUAGE];
-      const value = resolve(current, path) ?? resolve(fallback, path) ?? path;
+      const value =
+        resolve(detailTranslations[language], path) ??
+        resolve(translations[language], path) ??
+        resolve(detailTranslations[DEFAULT_LANGUAGE], path) ??
+        resolve(translations[DEFAULT_LANGUAGE], path) ??
+        path;
       return interpolate(value, vars);
     },
     [language]

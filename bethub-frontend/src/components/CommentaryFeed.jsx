@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MessageSquareText } from "lucide-react";
 import { PlayerAvatar } from "./common/Avatars";
+import { useI18n } from "../contexts/LanguageContext";
 import { api } from "../lib/api";
 import { cn, formatTime, oversOf } from "../lib/utils";
 
@@ -14,6 +15,7 @@ const labelFor = (ball) => {
 };
 
 export default function CommentaryFeed({ match }) {
+  const { t } = useI18n();
   const [balls, setBalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const updatedAt = match?.updatedAt;
@@ -45,15 +47,15 @@ export default function CommentaryFeed({ match }) {
   }, [balls]);
 
   if (loading) {
-    return <div className="card p-6 text-center text-xs text-white/35">Loading ball-by-ball…</div>;
+    return <div className="card p-6 text-center text-xs text-white/35">{t("commentary.loading")}</div>;
   }
 
   if (!balls.length) {
     return (
       <div className="card flex flex-col items-center gap-2 p-10 text-center">
         <MessageSquareText size={22} className="text-white/20" />
-        <p className="text-sm font-semibold text-white/60">No deliveries yet</p>
-        <p className="max-w-xs text-xs text-white/35">Ball-by-ball commentary appears here as soon as the scorer starts the match.</p>
+        <p className="text-sm font-semibold text-white/60">{t("commentary.emptyTitle")}</p>
+        <p className="max-w-xs text-xs text-white/35">{t("commentary.emptyText")}</p>
       </div>
     );
   }
@@ -64,9 +66,9 @@ export default function CommentaryFeed({ match }) {
         <div key={`${group.innings}-${group.over}`}>
           <div className="sticky top-16 z-10 flex items-center justify-between border-y border-white/[0.06] bg-ink-850/95 px-4 py-1.5 backdrop-blur">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-              Innings {group.innings + 1} · Over {group.over}
+              {t("commentary.inningsOver", { innings: group.innings + 1, over: group.over })}
             </p>
-            <p className="text-[10px] text-white/25">{group.balls.length} deliveries</p>
+            <p className="text-[10px] text-white/25">{t("commentary.deliveries", { count: group.balls.length })}</p>
           </div>
           <div className="divide-y divide-white/[0.04]">
             {[...group.balls].reverse().map((ball) => {
@@ -96,12 +98,12 @@ export default function CommentaryFeed({ match }) {
                       <span>·</span>
                       <span className="inline-flex items-center gap-1">
                         <PlayerAvatar player={ball.batsman} size="xs" className="!h-3.5 !w-3.5 !text-[6px]" />
-                        {ball.batsman?.name || "Batter"}
+                        {ball.batsman?.name || t("commentary.batter")}
                       </span>
                       <span>·</span>
-                      <span>{ball.bowler?.name || "Bowler"}</span>
+                      <span>{ball.bowler?.name || t("commentary.bowler")}</span>
                       <span>·</span>
-                      <span>Score {ball.scoreAfter?.runs}/{ball.scoreAfter?.wickets} ({ball.scoreAfter?.over} ov)</span>
+                      <span>{t("commentary.score", { runs: ball.scoreAfter?.runs, wickets: ball.scoreAfter?.wickets, overs: ball.scoreAfter?.over })}</span>
                       <span className="ml-auto hidden sm:inline">{formatTime(ball.createdAt)}</span>
                     </div>
                   </div>
@@ -112,7 +114,7 @@ export default function CommentaryFeed({ match }) {
         </div>
       ))}
       <div className="border-t border-white/[0.06] px-4 py-2.5 text-center text-[10px] text-white/25">
-        Showing latest 90 deliveries · full scorecard above · {oversOf(match?.innings?.[match.currentInnings]?.balls)} overs bowled
+        {t("commentary.footer", { overs: oversOf(match?.innings?.[match.currentInnings]?.balls) })}
       </div>
     </div>
   );
